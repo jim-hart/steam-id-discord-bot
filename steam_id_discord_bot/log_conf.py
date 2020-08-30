@@ -23,7 +23,7 @@ class _LoggingConfig:
     def __init__(self, config='logging.json'):
         self.project = _HERE.parent
         self.package = _HERE
-        with self.project.join(config).open() as f:
+        with self.project.joinpath(config).open() as f:
             self._cfg = json.load(f)
         self.configure()
 
