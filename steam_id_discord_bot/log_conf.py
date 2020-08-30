@@ -2,51 +2,13 @@ import json
 import logging
 import logging.config
 import os
+from pathlib import Path
 
-_HERE = os.path.dirname(__file__)
+_HERE = Path(__file__).parent.resovle()
 
 
 def _isfile(*parts):
     return os.path.isfile(os.path.join(*parts))
-
-
-def _trace_to_root(start=_HERE):
-    """Yield directories from `start` parent to its root path"""
-    parts = start.split(os.sep)
-    while parts:
-        yield os.sep.join(parts)
-        parts.pop()
-
-
-def _resolve_project_path():
-    """
-    Find the path to the project this file resides in; defaults to this
-    file's parent if no project found.
-    """
-    trace = _trace_to_root()
-    try:
-        path = next(p for p in trace if not _isfile(p, '__init__.py'))
-    except StopIteration:
-        path = _HERE
-    return path
-
-
-def _resolve_package_path():
-    """
-    Find the path to the package this file resides in; defaults to this
-    file's parent if no package found.
-    """
-    project = _resolve_project_path()
-    rel_path = os.path.relpath(_HERE, project)
-    head = rel_path.split(os.sep)[0]
-    return _HERE if head == '.' else os.path.join(project, head)
-
-
-def _resolve_config_path(cfg_file):
-    for curr in _trace_to_root():
-        if _isfile(curr, cfg_file):
-            return os.path.join(curr, cfg_file)
-    raise FileNotFoundError(cfg_file)
 
 
 class _LoggingConfig:
@@ -59,9 +21,9 @@ class _LoggingConfig:
         return cls._singleton
 
     def __init__(self, config='logging.json'):
-        self.project = _resolve_project_path()
-        self.package = _resolve_package_path()
-        with open(_resolve_config_path(config)) as f:
+        self.project = _HERE.parent
+        self.package = _HERE
+        with self.project.join(config).open() as f:
             self._cfg = json.load(f)
         self.configure()
 
