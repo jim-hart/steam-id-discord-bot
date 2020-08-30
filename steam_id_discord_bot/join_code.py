@@ -42,8 +42,12 @@ class JoinCode(commands.Cog):
         if message.content.startswith('$hello'):
             await message.channel.send('Hello!')
 
-    @commands.command(name='register')
+    @commands.command(name='linkid')
     async def register(self, ctx, steam_id: str):
+        if not steam_id.isnumeric():
+            await log_and_send(ctx.message.channel, "Invalid Seam ID")
+            return
+
         defaults = {'name': ctx.author.name,
                     'discriminator': ctx.author.discriminator,
                     'steam_id': steam_id}
@@ -52,8 +56,9 @@ class JoinCode(commands.Cog):
         if created:
             message = f"registered Steam ID {steam_id!r} with {user.uname!r}"
         else:
-            User.update(name=defaults['name'],
-                        discriminator=defaults['discriminator'])
+            for k, v in defaults.items():
+                setattr(user, k, v)
+            user.save()
             message = f"updated {user.uname!r} with Steam ID {steam_id!r}"
 
         await log_and_send(ctx.message.channel, message)
@@ -61,11 +66,14 @@ class JoinCode(commands.Cog):
     @commands.command(name='id')
     async def get_jump_code(self, ctx, name: str = None):
         if name is None:
-            return await log_and_send(ctx.message.channel, body)
+            query = User.select().where(User.discord_id == ctx.author.id)
+        else:
+            query = User.search_from_input(name)
 
-        users = list(User.search_from_input(name))
+        users = list(query)
         if len(users) == 0:
-            body = f"No user registered with {name!r}"
+            name = ctx.author.name if name is None else name
+            body = f"{name!r} has not registered their Steam ID"
         elif len(users) == 1:
             body = f"```{format_join_string(users[0])}```"
         else:
