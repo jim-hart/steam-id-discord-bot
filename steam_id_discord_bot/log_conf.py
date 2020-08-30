@@ -4,7 +4,7 @@ import logging.config
 import os
 from pathlib import Path
 
-_HERE = Path(__file__).parent.resovle()
+_HERE = Path(__file__).parent.resolve()
 
 
 def _isfile(*parts):
