@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "destiny-discord-bot"
+name = "steam-id-discord-bot"
 version = "0.1.0"
 description = "A package for managing Discord bots specific to Destiny"
 authors = ["Jim Hart <jim-hart@users.noreply.github.com>"]

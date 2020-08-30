@@ -86,7 +86,7 @@ class _LoggingConfig:
 
     def _configure_logger_names(self):
         """Sub out tags in logger names with the local package name"""
-        for name in self._cfg['loggers']:
+        for name in list(self._cfg['loggers']):
             logger = self._cfg['loggers'].pop(name)
             subbed = self._replace_tag(name)
             self._cfg['loggers'][subbed] = logger
